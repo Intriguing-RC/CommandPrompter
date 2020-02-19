@@ -24,10 +24,14 @@
 
 package com.cyr1en.cp.util;
 
+import com.google.common.io.ByteStreams;
+import org.apache.commons.lang.Validate;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.PluginDescriptionFile;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.zip.ZipFile;
 
 public class FileUtil {
@@ -77,5 +81,33 @@ public class FileUtil {
       e.printStackTrace();
     }
     return pdl;
+  }
+
+  public static Copier copy(String path) {
+    Validate.notNull(path, "No file path given!");
+    return new Copier(getResourceAsStream(path));
+  }
+
+  public static class Copier {
+
+    private InputStream fileToCopy;
+
+    public Copier(InputStream fileToCopy) {
+      this.fileToCopy = fileToCopy;
+    }
+
+    public void to(String path) {
+      to(Paths.get(path));
+    }
+
+    public void to(Path path) {
+      try {
+        File outF = new File(path.toFile(), String.valueOf(path.getFileName()));
+        OutputStream out = new FileOutputStream(outF);
+        ByteStreams.copy(fileToCopy, out);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
   }
 }

@@ -1,2 +1,5 @@
 rootProject.name = 'CommandPrompter'
+include 'commandprompter-plugin'
+include 'commandprompter-delegate'
+include 'commandprompter-api'
 

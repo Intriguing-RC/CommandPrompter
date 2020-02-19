@@ -30,6 +30,7 @@ import com.cyr1en.cp.command.CommodoreRegistry;
 import com.cyr1en.cp.commands.Reload;
 import com.cyr1en.cp.config.SimpleConfig;
 import com.cyr1en.cp.config.SimpleConfigManager;
+import com.cyr1en.cp.instrumentation.DispatchInstrumentation;
 import com.cyr1en.cp.listener.CommandListener;
 import com.cyr1en.cp.util.I18N;
 import com.cyr1en.cp.util.SRegex;
@@ -38,6 +39,7 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
@@ -46,6 +48,7 @@ import java.util.logging.Logger;
 public class CommandPrompter extends JavaPlugin {
 
   private final String[] CONFIG_HEADER = new String[]{"CPCommand Prompter", "Configuration"};
+  private static CommandPrompter instance;
 
   private SimpleConfigManager manager;
   private SimpleConfig config;
@@ -75,6 +78,8 @@ public class CommandPrompter extends JavaPlugin {
     setupConfig();
     setupUpdater();
     setupCommands();
+    instrumentDispatcher();
+    instance = this;
   }
 
   private void setupConfig() {
@@ -109,6 +114,23 @@ public class CommandPrompter extends JavaPlugin {
                       "ONLY CHANGE THE FIRST AND LAST",
                       "I.E (.*?), {.*?}, or [.*?]"});
       config.saveConfig();
+    }
+    if(config.get("Instrument-Dispatcher") == null) {
+      config.set("Instrument-Dispatcher", false,
+              new String[]{"Will you allow CommandPrompter",
+                      "to modify spigot CommandMap?",
+                      "",
+                      "",
+                      "WARNING, THIS IS A GLOBAL MODIFICATION",
+                      "AND CAN AFFECT FUNCTIONALITY OF OTHER",
+                      "PLUGINS, USE WITH CAUTION!"});
+      config.saveConfig();
+    }
+  }
+
+  private void instrumentDispatcher() {
+    if(config.getBoolean("Instrument-Dispatcher")) {
+      new DispatchInstrumentation(this).instrument();
     }
   }
 
@@ -153,6 +175,9 @@ public class CommandPrompter extends JavaPlugin {
     return config;
   }
 
+  public static CommandPrompter getInstance() {
+    return CommandPrompter.instance;
+  }
 
   public UpdateChecker getUpdateChecker() {
     return updateChecker;

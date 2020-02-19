@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '4.0.2'
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+    mavenLocal()
+    maven { url 'https://nexus.wesjd.net/repository/thirdparty/' }
+    maven { url 'https://repo.lucko.me/' }
+    maven { url 'https://libraries.minecraft.net' }
+    maven { url "http://repo.dmulloy2.net/nexus/repository/public/" }
+    maven { url 'https://repo.codemc.org/repository/maven-public' }
+    flatDir { dirs 'libs' }
+}
+
+dependencies {
+    compile group: 'org.jetbrains', name: 'annotations', version: '19.0.0'
+    compile group: 'net.bytebuddy', name: 'byte-buddy', version: '1.10.7'
+    compile group: 'net.bytebuddy', name: 'byte-buddy-agent', version: '1.10.7'
+    compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.26'
+    compile 'com.github.cyr1en:javen:1.1.1'
+    compile 'org.bstats:bstats-bukkit:1.5'
+    compile 'com.github.CyR1en:AnvilGUI:ca30eea111'
+    compile('me.lucko:commodore:1.5') {
+        exclude group: 'com.mojang'
+    }
+
+    compile project(':commandprompter-api')
+    compileOnly project(':commandprompter-delegate')
+
+    compileOnly 'com.mojang:brigadier:1.0.15'
+    compileOnly 'org.spigotmc:spigot-api:1.15.1-R0.1-SNAPSHOT'
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        expand 'pluginVersion': project.ext.fullVersion
+        include 'plugin.yml'
+    }
+}
+
+shadowJar {
+    archiveName = "${project.name}-${project.ext.fullVersion}.jar"
+    relocate 'me.lucko.commodore', 'com.cyr1en.cp.commodore'
+    relocate 'org.bstats', 'com.cyr1en.cp.bstats'
+}
+
+artifacts {
+    archives shadowJar
+}

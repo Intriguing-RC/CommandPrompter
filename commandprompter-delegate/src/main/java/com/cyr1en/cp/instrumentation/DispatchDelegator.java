@@ -21,28 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-subprojects {
-    apply plugin: 'java'
 
-    group 'com.cyr1en'
-    version = "1.0-SNAPSHOT"
+package com.cyr1en.cp.instrumentation;
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+import org.apache.commons.lang.Validate;
+import org.bukkit.command.CommandException;
+import org.bukkit.command.CommandSender;
 
-    project.ext.majorVersion = '0'
-    project.ext.minorVersion = '2'
-    project.ext.patchVersion = '0'
-    project.ext.fullVersion = project.ext.majorVersion + '.' + project.ext.minorVersion + '.' + project.ext.patchVersion
+import java.util.function.BiFunction;
 
-    tasks.withType(JavaCompile) {
-        options.encoding = 'UTF-8'
-    }
+public class DispatchDelegator {
 
-    repositories {
-        maven { url 'https://jitpack.io' }
-        maven { url 'https://repo.codemc.org/repository/maven-public' }
-        maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
-        mavenCentral()
-    }
+  private static BiFunction<CommandSender, String, Boolean> delegateFunction;
+
+  public static void init(BiFunction<CommandSender, String, Boolean> delegateFunction) {
+    DispatchDelegator.delegateFunction = delegateFunction;
+  }
+
+  public static boolean dispatch(CommandSender sender, String commandLine) throws CommandException {
+    Validate.notNull(delegateFunction, "delegate function wasn't initialized!");
+    return delegateFunction.apply(sender, commandLine);
+  }
 }
