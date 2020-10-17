@@ -144,7 +144,8 @@ public class Prompt implements Listener {
   }
 
   private void process(Player sender, String response) {
-    if (response.equalsIgnoreCase(cancelKey)) {
+    String responseWithoutColor = ChatColor.stripColor(response)
+    if (responseWithoutColor.equalsIgnoreCase(cancelKey)) {
       cancel();
     } else if (prompts.size() > 1) {
       String currPrompt = prompts.poll();
